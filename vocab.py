@@ -79,7 +79,7 @@ class Vocabulary:
         for token, freq in token_freqs:
             if freq < min_freq or len(self.id2token) == max_size:
                 break
-            if token not in specials:
+            if token not in self.specials:
                 self.id2token.append(token)
                 self.token2id[token] = len(self.id2token) - 1
 
