@@ -98,5 +98,17 @@ def pad(sent, max_len):
     return (sent + [0] * (max_len - length))[:max_len] if length < max_len else sent[:max_len]
 
 
+def to_cuda(*args, device=None):
+    """
+    Move Tensors to CUDA. 
+    If no device provided, default to the first card in CUDA_VISIBLE_DEVICES.
+    """
+    assert all(torch.is_tensor(t) for t in args), \
+            'Only support for tensors, please check if any nn.Module exists.'
+    if device is None:
+        device = torch.device('cuda:0')
+    return [None if x is None else x.to(device) for x in args]
+
+
 if __name__ == '__main__':
     print(normalize('ǖǘǚǜ'))
