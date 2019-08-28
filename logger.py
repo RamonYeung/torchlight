@@ -11,6 +11,7 @@ import argparse
 import subprocess
 import numpy as np
 from datetime import timedelta
+from utils import get_code_version
 
 
 class LogFormatter():
@@ -102,6 +103,8 @@ def initialize_exp(params):
     logger.info("============ Initialized logger ============")
     logger.info("\n".join("%s: %s" % (k, str(v))
                           for k, v in sorted(dict(vars(params)).items())))
+    text = f'# Git Version: {get_code_version()} #'
+    logger.info("\n".join(['=' * 24, text, '=' * 24]))
     logger.info("The experiment will be stored in %s\n" % params.dump_path)
     logger.info("Running command: %s" % command)
     logger.info("")

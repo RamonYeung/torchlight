@@ -110,5 +110,22 @@ def to_cuda(*args, device=None):
     return [None if x is None else x.to(device) for x in args]
 
 
+def get_code_version(short_sha=True):
+    from subprocess import check_output, STDOUT, CalledProcessError
+    try:
+        sha = check_output('git rev-parse HEAD', stderr=STDOUT,
+                         shell=True, encoding='utf-8')
+        if short_sha:
+            sha = sha[:7]
+        return sha
+    except CalledProcessError:
+      # There was an error - command exited with non-zero code
+      pwd = check_output('pwd', stderr=STDOUT, shell=True, encoding='utf-8')
+      pwd = os.path.abspath(pwd).strip()
+      print(f'Working dir {pwd} is not a git repo.')
+
+
 if __name__ == '__main__':
     print(normalize('ǖǘǚǜ'))
+
+
