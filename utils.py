@@ -4,6 +4,7 @@ Utilizations for common usages.
 import os
 import random
 import torch
+import numpy as np
 from difflib import SequenceMatcher
 from unidecode import unidecode
 from datetime import datetime
@@ -27,13 +28,14 @@ def personal_display_settings():
 
 def set_seed(seed):
     """
-    Freeze every seed.
-    All about reproducibility
-    TODO multiple GPU seed, torch.cuda.all_seed()
+    Freeze every seed for reproducibility.
+    torch.cuda.manual_seed_all is useful when using random generation on GPUs.
+    e.g. torch.cuda.FloatTensor(100).uniform_()
     """
     random.seed(seed)
+    np.random.seed(seed)
     torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
 
 
 def normalize(s):
