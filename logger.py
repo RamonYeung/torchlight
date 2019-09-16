@@ -11,7 +11,7 @@ import argparse
 import subprocess
 import numpy as np
 from datetime import timedelta
-from utils import get_code_version
+from .utils import get_code_version
 
 
 class LogFormatter():
@@ -77,8 +77,8 @@ def initialize_exp(params):
     - create a logger
     """
     # dump parameters
-    get_dump_path(params)
-    pickle.dump(params, open(os.path.join(params.dump_path, 'params.pkl'), 'wb'))
+    exp_folder = get_dump_path(params)
+    pickle.dump(params, open(os.path.join(exp_folder, 'params.pkl'), 'wb'))
 
     # get running command
     command = ["python", sys.argv[0]]
@@ -99,13 +99,13 @@ def initialize_exp(params):
     assert len(params.exp_name.strip()) > 0
 
     # create a logger
-    logger = create_logger(os.path.join(params.dump_path, 'train.log'), rank=getattr(params, 'global_rank', 0))
+    logger = create_logger(os.path.join(exp_folder, 'train.log'), rank=getattr(params, 'global_rank', 0))
     logger.info("============ Initialized logger ============")
     logger.info("\n".join("%s: %s" % (k, str(v))
                           for k, v in sorted(dict(vars(params)).items())))
     text = f'# Git Version: {get_code_version()} #'
     logger.info("\n".join(['=' * 24, text, '=' * 24]))
-    logger.info("The experiment will be stored in %s\n" % params.dump_path)
+    logger.info("The experiment will be stored in %s\n" % exp_folder)
     logger.info("Running command: %s" % command)
     logger.info("")
     return logger
@@ -135,9 +135,10 @@ def get_dump_path(params):
         params.exp_id = exp_id
 
     # create the dump folder / update parameters
-    params.dump_path = os.path.join(sweep_path, params.exp_id)
-    if not os.path.isdir(params.dump_path):
-        subprocess.Popen("mkdir -p %s" % params.dump_path, shell=True).wait()
+    exp_folder = os.path.join(sweep_path, params.exp_id)
+    if not os.path.isdir(exp_folder):
+        subprocess.Popen("mkdir -p %s" % exp_folder, shell=True).wait()
+    return exp_folder
 
 
 if __name__ == '__main__':
