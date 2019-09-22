@@ -121,10 +121,35 @@ def get_code_version(short_sha=True):
             sha = sha[:7]
         return sha
     except CalledProcessError:
-      # There was an error - command exited with non-zero code
-      pwd = check_output('pwd', stderr=STDOUT, shell=True, encoding='utf-8')
-      pwd = os.path.abspath(pwd).strip()
-      print(f'Working dir {pwd} is not a git repo.')
+        # There was an error - command exited with non-zero code
+        pwd = check_output('pwd', stderr=STDOUT, shell=True, encoding='utf-8')
+        pwd = os.path.abspath(pwd).strip()
+        print(f'Working dir {pwd} is not a git repo.')
+
+
+def cat_ragged_tensors(left, right):
+    assert left.size(0) == right.size(0)
+    batch_size = left.size(0)
+    max_len = left.size(1) + right.size(1)
+
+    len_left = (left != 0).sum(dim=1)
+    len_right = (right != 0).sum(dim=1)
+    
+    left_seq = left.unbind()
+    right_seq = right.unbind()
+    # handle zero padding
+    output = torch.zeros((batch_size, max_len), dtype=torch.long, device=left.device)
+    for i, row_left, row_right, l1, l2 in zip(range(batch_size), 
+                                              left_seq, right_seq, 
+                                              len_left, len_right):
+        l1 = l1.item()
+        l2 = l2.item()
+        j = l1 + l2
+        # concatenate rows of ragged tensors
+        row_cat = torch.cat((row_left[:l1], row_right[:l2]))
+        # copy to empty tensor
+        output[i, :j] = row_cat
+    return output
 
 
 if __name__ == '__main__':
