@@ -44,7 +44,7 @@ def create_logger(filepath, rank):
     if filepath is not None:
         if rank > 0:
             filepath = '%s-%i' % (filepath, rank)
-        file_handler = logging.FileHandler(filepath, "a")
+        file_handler = logging.FileHandler(filepath, "a", encoding='utf-8')
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(log_formatter)
 
