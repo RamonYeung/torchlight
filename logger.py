@@ -10,7 +10,7 @@ import logging
 import argparse
 import subprocess
 import numpy as np
-from datetime import timedelta
+from datetime import timedelta, date
 from .utils import get_code_version
 
 
@@ -121,7 +121,8 @@ def get_dump_path(params):
     dump_path = params.dump_path
 
     # create the sweep path if it does not exist
-    sweep_path = os.path.join(dump_path, params.exp_name)
+    when = date.today().strftime('%m%d-')
+    sweep_path = os.path.join(dump_path, when + params.exp_name)
     if not os.path.exists(sweep_path):
         subprocess.Popen("mkdir -p %s" % sweep_path, shell=True).wait()
 
