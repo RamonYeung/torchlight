@@ -1,4 +1,4 @@
-from .logger import initialize_exp
+from .logger import initialize_exp, get_dump_path
 from .metric import Metric, CategoricalAccuracy, PRMetric
 from .module import LSTM4VarLenSeq
 from .vocab import (PAD_TOKEN, UNK_TOKEN, BOS_TOKEN, EOS_TOKEN,

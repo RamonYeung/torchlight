@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import time
+import json
 import torch
 import pickle
 import random
@@ -78,7 +79,7 @@ def initialize_exp(params):
     """
     # dump parameters
     exp_folder = get_dump_path(params)
-    pickle.dump(params, open(os.path.join(exp_folder, 'params.pkl'), 'wb'))
+    json.dump(vars(params), open(os.path.join(exp_folder, 'params.pkl'), 'w'), indent=4)
 
     # get running command
     command = ["python", sys.argv[0]]
