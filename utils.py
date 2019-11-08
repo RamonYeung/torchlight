@@ -8,6 +8,7 @@ import numpy as np
 from difflib import SequenceMatcher
 from unidecode import unidecode
 from datetime import datetime
+from torch.nn.parallel import DataParallel, DistributedDataParallel
 
 
 def personal_display_settings():
@@ -65,9 +66,12 @@ def snapshot(model, epoch, save_path):
     F-string feature new in Python 3.6+ is used.
     """
     os.makedirs(save_path, exist_ok=True)
-    current = datetime.now()
-    timestamp = f'{current.month:02d}{current.day:02d}_{current.hour:02d}{current.minute:02d}'
-    torch.save(model.state_dict(), save_path + f'{type(model).__name__}_{timestamp}_{epoch}th_epoch.pkl')
+    timestamp = datetime.now().strftime('%m%d_%H%M')
+    save_path = os.path.join(save_path, f'{type(model).__name__}_{timestamp}_{epoch}th_epoch.pkl')
+    if isinstance(model, (DataParallel, DistributedDataParallel)):
+        torch.save(model.module.state_dict(), save_path)
+    else:
+        torch.save(model.state_dict(), save_path)
 
 
 def show_params(model):
