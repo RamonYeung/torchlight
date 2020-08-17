@@ -14,20 +14,45 @@ import numpy as np
 from datetime import timedelta, date
 from .utils import get_code_version
 
+def basic_params(parser: argparse.ArgumentParser,
+                 default_command: str = "",
+                 default_exp_id: str = "",
+                 default_exp_name: str = "untitled",
+                 default_dump_path: str = "",
+                 default_global_rank: int = logging.DEBUG) -> None:
+    parser.add_argument("--command",
+                        help="don't use",
+                        type=str,
+                        default=default_command)
+    parser.add_argument("--exp_id",
+                        help="id of exp",
+                        type=str,
+                        default=default_exp_id)
+    parser.add_argument("--exp_name",
+                        help="name of exp",
+                        type=str,
+                        default=default_exp_name)
+    parser.add_argument("--dump_path",
+                        help="dump path",
+                        type=str,
+                        default=default_dump_path)
+    parser.add_argument("--global_rank",
+                        help="the rank of logger",
+                        type=int,
+                        default=default_global_rank)
+    return None
 
 class LogFormatter():
-
     def __init__(self):
         self.start_time = time.time()
 
     def format(self, record):
         elapsed_seconds = round(record.created - self.start_time)
 
-        prefix = "%s - %s - %s" % (
-            record.levelname,
-            time.strftime('%x %X'),
-            timedelta(seconds=elapsed_seconds)
-        )
+        prefix = "%s - %s - %s" % (record.levelname, time.strftime('%x %X'),
+                                   timedelta(seconds=elapsed_seconds))
+        # “日志的输出级别（DEBUG,INFO,WARNING,ERROR,CRITICAL） - 日期 时间 - 运行时长”
+        # 上一行的日志级别越向后越是严重的问题
         message = record.getMessage()
         message = message.replace('\n', '\n' + ' ' * (len(prefix) + 3))
         return "%s - %s" % (prefix, message) if message else ''
@@ -66,12 +91,13 @@ def create_logger(filepath, rank):
     # reset logger elapsed time
     def reset_time():
         log_formatter.start_time = time.time()
+
     logger.reset_time = reset_time
 
     return logger
 
 
-def initialize_exp(params):
+def initialize_exp(params : argparse.Namespace) -> logging.Logger:
     """
     Initialize the experiment:
     - dump parameters
@@ -79,8 +105,10 @@ def initialize_exp(params):
     """
     # dump parameters
     exp_folder = get_dump_path(params)
-    json.dump(vars(params), open(os.path.join(exp_folder, 'params.pkl'), 'w'), indent=4)
-
+    json.dump(vars(params),
+              open(os.path.join(exp_folder, 'params.pkl'), 'w'),
+              indent=4)
+    
     # get running command
     command = ["python", sys.argv[0]]
     for x in sys.argv[1:]:
@@ -95,12 +123,13 @@ def initialize_exp(params):
                 command.append("'%s'" % x)
     command = ' '.join(command)
     params.command = command + ' --exp_id "%s"' % params.exp_id
-
+    
     # check experiment name
     assert len(params.exp_name.strip()) > 0
 
     # create a logger
-    logger = create_logger(os.path.join(exp_folder, 'train.log'), rank=getattr(params, 'global_rank', 0))
+    logger = create_logger(os.path.join(exp_folder, 'train.log'),
+                           rank=getattr(params, 'global_rank', 0))
     logger.info("============ Initialized logger ============")
     logger.info("\n".join("%s: %s" % (k, str(v))
                           for k, v in sorted(dict(vars(params)).items())))
@@ -110,7 +139,6 @@ def initialize_exp(params):
     logger.info("Running command: %s" % command)
     logger.info("")
     return logger
-
 
 def get_dump_path(params):
     """
