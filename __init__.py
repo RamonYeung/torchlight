@@ -13,5 +13,6 @@ from .utils import (personal_display_settings,
                     pad,
                     to_cuda,
                     get_code_version,
-                    cat_ragged_tensors)
+                    cat_ragged_tensors,
+                    topk_accuracy)
 

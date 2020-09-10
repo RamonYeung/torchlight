@@ -156,6 +156,17 @@ def cat_ragged_tensors(left, right):
     return output
 
 
+def topk_accuracy(inputs, labels, k=1, largest=True):
+    assert len(inputs.size()) == 2
+    assert len(labels.size()) == 2
+    _, indices = inputs.topk(k=k, largest=largest)
+    result = indices - labels  # boardcast
+    nonzero_count = (result != 0).sum(dim=1, keepdim=True)
+    num_correct = (nonzero_count != result.size(1)).sum().item()
+    num_example = inputs.size(0)
+    return num_correct, num_example
+
+
 if __name__ == '__main__':
     print(normalize('ǖǘǚǜ'))
 
