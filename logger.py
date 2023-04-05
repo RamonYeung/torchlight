@@ -71,7 +71,7 @@ def create_logger(filepath, rank):
     return logger
 
 
-def initialize_exp(params):
+def initialize_exp(params, highlight=False):
     """
     Initialize the experiment:
     - dump parameters
@@ -106,7 +106,10 @@ def initialize_exp(params):
                           for k, v in sorted(dict(vars(params)).items())))
     text = f'# Git Version: {get_code_version()} #'
     logger.info("\n".join(['=' * 24, text, '=' * 24]))
-    logger.info("The experiment will be stored in %s\n" % exp_folder)
+    if highlight:
+        logger.info("\x1b[31;1m" + f"The experiment will be stored in {exp_folder}\n" + "\x1b[0m")
+    else:
+        logger.info(f"The experiment will be stored in {exp_folder}\n")
     logger.info("Running command: %s" % command)
     logger.info("")
     return logger
